@@ -1,0 +1,78 @@
+/**
+ * Homepage hero — styles scoped to this page.
+ */
+
+.heroBanner {
+  padding: 4rem 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
+  color: #ffffff;
+}
+
+.heroInner {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.heroText {
+  flex: 1 1 55%;
+}
+
+.heroArt {
+  flex: 1 1 45%;
+  display: flex;
+  justify-content: center;
+}
+
+.heroArt img {
+  width: 100%;
+  max-width: 460px;
+}
+
+.heroTitle {
+  font-size: 3rem;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.heroTagline {
+  font-size: 1.25rem;
+  color: #c7d2fe;
+  margin-bottom: 1.5rem;
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.heroOutlineButton {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.heroOutlineButton:hover {
+  color: #312e81;
+  background-color: #ffffff;
+}
+
+@media screen and (max-width: 996px) {
+  .heroInner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .heroArt {
+    order: -1;
+  }
+
+  .heroTitle {
+    font-size: 2.25rem;
+  }
+
+  .buttons {
+    justify-content: center;
+  }
+}

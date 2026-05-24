@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 380" fill="none" role="img" aria-label="An API gateway upgrade">
+  <!-- request flow track -->
+  <path d="M20 250 H500" stroke="#ffffff" stroke-opacity="0.25" stroke-width="2" stroke-dasharray="2 9" stroke-linecap="round"/>
+  <!-- gateway arches -->
+  <path d="M120 322 V170 a140 140 0 0 1 280 0 V322" stroke="#ffffff" stroke-opacity="0.30" stroke-width="10" stroke-linecap="round"/>
+  <path d="M165 322 V182 a95 95 0 0 1 190 0 V322" stroke="#ffffff" stroke-opacity="0.55" stroke-width="9" stroke-linecap="round"/>
+  <path d="M210 322 V192 a50 50 0 0 1 100 0 V322" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+  <!-- requests flowing through -->
+  <circle cx="56" cy="250" r="9" fill="#67e8f9"/>
+  <circle cx="118" cy="250" r="8" fill="#22d3ee"/>
+  <circle cx="260" cy="250" r="12" fill="#06b6d4"/>
+  <circle cx="402" cy="250" r="8" fill="#22d3ee"/>
+  <circle cx="464" cy="250" r="9" fill="#67e8f9"/>
+  <!-- upgrade chevrons -->
+  <path d="M228 96 L260 58 L292 96" stroke="#67e8f9" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M236 132 L260 104 L284 132" stroke="#ffffff" stroke-opacity="0.7" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

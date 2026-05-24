@@ -1,0 +1,81 @@
+name: CI
+
+# Build and test on pull requests and on pushes to non-main branches.
+# Deploys from main are handled by deploy.yml.
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  java:
+    name: Build Java services
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build and test
+        run: mvn -B verify
+
+  docs:
+    name: Build documentation site
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Build site
+        run: npm run build
+
+  web:
+    name: Build SPA
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+
+  terraform:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: Format check
+        run: terraform fmt -check -recursive infra
+      - name: Validate infra
+        working-directory: infra
+        run: |
+          terraform init -backend=false
+          terraform validate
+      - name: Validate bootstrap
+        working-directory: infra/bootstrap
+        run: |
+          terraform init -backend=false
+          terraform validate

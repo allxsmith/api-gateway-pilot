@@ -1,0 +1,142 @@
+openapi: 3.0.3
+info:
+  title: auth-server
+  version: 0.1.0
+  description: >-
+    OAuth2 Authorization Server for the API Gateway Pilot prototype. Issues JWT
+    access and refresh tokens and supports the Authorization Code + PKCE flow.
+    The protocol endpoints are provided by Spring Authorization Server; OAuth
+    clients are read from the legacy `oauth_client_details` table.
+servers:
+  - url: http://localhost:8088
+    description: Local (nginx reverse proxy)
+tags:
+  - name: OAuth2
+  - name: OpenID Connect
+  - name: Operations
+paths:
+  /oauth2/authorize:
+    get:
+      tags: [OAuth2]
+      summary: Authorization endpoint
+      description: >-
+        Starts the Authorization Code flow. The SPA redirects the browser here
+        with PKCE parameters; the user signs in and is redirected back to the
+        client with an authorization code.
+      parameters:
+        - name: response_type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [code]
+        - name: client_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: redirect_uri
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: scope
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+        - name: code_challenge
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: code_challenge_method
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [S256]
+      responses:
+        '302':
+          description: Redirect to the login page, or back to the client with a code.
+  /oauth2/token:
+    post:
+      tags: [OAuth2]
+      summary: Token endpoint
+      description: >-
+        Exchanges an authorization code (with its PKCE verifier) or a refresh
+        token for tokens. Also serves the client credentials grant.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                  enum: [authorization_code, refresh_token, client_credentials]
+                code:
+                  type: string
+                redirect_uri:
+                  type: string
+                client_id:
+                  type: string
+                code_verifier:
+                  type: string
+                refresh_token:
+                  type: string
+      responses:
+        '200':
+          description: A token response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  id_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+                  expires_in:
+                    type: integer
+                    example: 900
+        '400':
+          description: Invalid request or grant.
+  /oauth2/jwks:
+    get:
+      tags: [OAuth2]
+      summary: JSON Web Key Set
+      description: Public keys used to verify JWT signatures. The resource-api fetches these.
+      responses:
+        '200':
+          description: The JWK set.
+  /.well-known/openid-configuration:
+    get:
+      tags: [OpenID Connect]
+      summary: OpenID Connect discovery document
+      responses:
+        '200':
+          description: Issuer metadata and endpoint URLs.
+  /login:
+    get:
+      tags: [OAuth2]
+      summary: Login page
+      responses:
+        '200':
+          description: The HTML login form.
+  /actuator/health:
+    get:
+      tags: [Operations]
+      summary: Health check
+      responses:
+        '200':
+          description: The service is healthy.

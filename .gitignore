@@ -1,0 +1,58 @@
+# --- Java / Maven ---
+target/
+*.class
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- Docusaurus ---
+docs/build/
+docs/.docusaurus/
+docs/.cache-loader/
+docs/docs/api/
+
+# --- Vite / web build ---
+web/dist/
+web/dist-ssr/
+
+# --- Terraform ---
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars.local
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+backend.hcl
+
+# --- Env / secrets ---
+.env
+.env.local
+*.local
+
+# --- IDE / editors ---
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+logs/

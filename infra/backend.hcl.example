@@ -1,0 +1,6 @@
+# Copy to backend.hcl and fill in the state bucket from `infra/bootstrap`.
+# Then: terraform init -backend-config=backend.hcl
+bucket       = "REPLACE-WITH-STATE-BUCKET-NAME"
+key          = "dev/terraform.tfstate"
+region       = "us-east-1"
+use_lockfile = true

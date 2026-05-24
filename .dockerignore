@@ -1,0 +1,10 @@
+**/target
+**/node_modules
+**/.terraform
+**/build
+docs/.docusaurus
+docs/static/api
+.git
+.github
+*.log
+.env

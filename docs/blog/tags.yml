@@ -1,0 +1,14 @@
+prototype:
+  label: Prototype
+  permalink: /prototype
+  description: Notes on building the prototype.
+
+milestone:
+  label: Milestone
+  permalink: /milestone
+  description: Milestone updates as phases land.
+
+architecture:
+  label: Architecture
+  permalink: /architecture
+  description: Architecture and design decisions.

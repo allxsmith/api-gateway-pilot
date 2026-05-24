@@ -1,0 +1,108 @@
+name: Deploy
+
+# Builds images, applies Terraform, and publishes the SPA.
+# Requires two repository variables (Settings -> Variables):
+#   AWS_DEPLOY_ROLE  - the IAM role ARN from infra/bootstrap
+#   TF_STATE_BUCKET  - the Terraform state bucket from infra/bootstrap
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  TF_STATE_KEY: dev/terraform.tfstate
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Terraform init
+        working-directory: infra
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
+            -backend-config="key=${TF_STATE_KEY}" \
+            -backend-config="region=${AWS_REGION}" \
+            -backend-config="use_lockfile=true"
+
+      # ECR repositories must exist before images can be pushed.
+      - name: Create ECR repositories
+        working-directory: infra
+        run: terraform apply -auto-approve -target=aws_ecr_repository.this
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        run: |
+          ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+          REGISTRY="${ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+          aws ecr get-login-password --region "${AWS_REGION}" \
+            | docker login --username AWS --password-stdin "${REGISTRY}"
+          echo "registry=${REGISTRY}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push images
+        run: |
+          SHA="${GITHUB_SHA::12}"
+          REGISTRY="${{ steps.ecr.outputs.registry }}"
+          for svc in auth-server resource-api nginx; do
+            if [ "$svc" = "nginx" ]; then CONTEXT="nginx"; else CONTEXT="."; fi
+            docker build --platform linux/amd64 \
+              -f "${svc}/Dockerfile" \
+              -t "${REGISTRY}/api-gateway-pilot/${svc}:${SHA}" \
+              -t "${REGISTRY}/api-gateway-pilot/${svc}:latest" \
+              "${CONTEXT}"
+            docker push "${REGISTRY}/api-gateway-pilot/${svc}:${SHA}"
+            docker push "${REGISTRY}/api-gateway-pilot/${svc}:latest"
+          done
+
+      - name: Terraform apply
+        working-directory: infra
+        run: terraform apply -auto-approve -var="image_tag=${GITHUB_SHA::12}"
+
+      - name: Build the SPA
+        working-directory: web
+        run: |
+          CF_URL=$(terraform -chdir=../infra output -raw cloudfront_url)
+          {
+            echo "VITE_OIDC_AUTHORITY=${CF_URL}"
+            echo "VITE_API_BASE=${CF_URL}"
+          } > .env.production
+          npm ci
+          npm run build
+
+      - name: Publish the SPA
+        working-directory: infra
+        run: |
+          BUCKET=$(terraform output -raw spa_bucket)
+          DIST=$(terraform output -raw cloudfront_distribution_id)
+          aws s3 sync ../web/dist "s3://${BUCKET}" --delete
+          aws cloudfront create-invalidation --distribution-id "${DIST}" --paths "/*"
+
+      - name: Summary
+        working-directory: infra
+        run: |
+          echo "Deployed: $(terraform output -raw cloudfront_url)" >> "$GITHUB_STEP_SUMMARY"

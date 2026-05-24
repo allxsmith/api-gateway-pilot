@@ -1,0 +1,8 @@
+{
+  "label": "Services",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "The services that make up the prototype."
+  }
+}

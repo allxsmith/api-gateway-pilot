@@ -1,0 +1,158 @@
+openapi: 3.0.3
+info:
+  title: resource-api
+  version: 0.1.0
+  description: >-
+    Serves user and device information for the API Gateway Pilot prototype.
+    Every `/api` endpoint requires a JWT access token issued by the auth-server.
+servers:
+  - url: http://localhost:8088
+    description: Local (nginx reverse proxy)
+tags:
+  - name: User
+  - name: Devices
+  - name: Operations
+security:
+  - bearerAuth: []
+paths:
+  /api/me:
+    get:
+      tags: [User]
+      summary: Get the current user's profile
+      operationId: getMe
+      responses:
+        '200':
+          description: The authenticated user's profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+        '401':
+          description: Missing or invalid access token.
+  /api/devices:
+    get:
+      tags: [Devices]
+      summary: List the current user's devices
+      operationId: getDevices
+      responses:
+        '200':
+          description: The user's devices, most recently seen first.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceInfo'
+        '401':
+          description: Missing or invalid access token.
+    post:
+      tags: [Devices]
+      summary: Record the device the user signed in from
+      operationId: registerDevice
+      description: >-
+        Upserts a device for the user. A device with the same name is updated
+        in place rather than duplicated.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDeviceRequest'
+      responses:
+        '201':
+          description: The recorded device.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceInfo'
+        '400':
+          description: Validation failed.
+        '401':
+          description: Missing or invalid access token.
+  /actuator/health:
+    get:
+      tags: [Operations]
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: The service is healthy.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UserInfo:
+      type: object
+      properties:
+        username:
+          type: string
+          example: alice
+        fullName:
+          type: string
+          nullable: true
+          example: Alice Anderson
+        email:
+          type: string
+          nullable: true
+          example: alice@example.com
+        phone:
+          type: string
+          nullable: true
+          example: "+1-555-0101"
+        department:
+          type: string
+          nullable: true
+          example: Platform Engineering
+        jobTitle:
+          type: string
+          nullable: true
+          example: Staff Engineer
+    DeviceInfo:
+      type: object
+      properties:
+        deviceName:
+          type: string
+          example: Chrome on macOS
+        deviceType:
+          type: string
+          nullable: true
+          example: laptop
+        os:
+          type: string
+          nullable: true
+          example: macOS
+        browser:
+          type: string
+          nullable: true
+          example: Chrome
+        lastSeenAt:
+          type: string
+          format: date-time
+          nullable: true
+        registeredAt:
+          type: string
+          format: date-time
+          nullable: true
+    RegisterDeviceRequest:
+      type: object
+      required: [deviceName]
+      properties:
+        deviceName:
+          type: string
+          maxLength: 150
+          example: Chrome on macOS
+        deviceType:
+          type: string
+          maxLength: 50
+          example: laptop
+        os:
+          type: string
+          maxLength: 80
+          example: macOS
+        browser:
+          type: string
+          maxLength: 80
+          example: Chrome

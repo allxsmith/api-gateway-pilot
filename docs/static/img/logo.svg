@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none" role="img" aria-label="API Gateway Pilot logo">
+  <path d="M7 35 V18 a13 13 0 0 1 26 0 V35" stroke="#4f46e5" stroke-width="5" stroke-linecap="round"/>
+  <path d="M15 35 V19 a5 5 0 0 1 10 0 V35" stroke="#818cf8" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="20" cy="27" r="3.6" fill="#06b6d4"/>
+  <path d="M14 9 L20 3 L26 9" stroke="#06b6d4" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
