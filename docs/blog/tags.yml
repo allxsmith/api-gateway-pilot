@@ -1,14 +1,14 @@
-prototype:
-  label: Prototype
-  permalink: /prototype
-  description: Notes on building the prototype.
+tutorial:
+  label: Tutorial
+  permalink: /tutorial
+  description: Follow-along tutorial posts.
 
-milestone:
-  label: Milestone
-  permalink: /milestone
-  description: Milestone updates as phases land.
+series:
+  label: Series
+  permalink: /series
+  description: Part-based series — read in order.
 
 architecture:
   label: Architecture
   permalink: /architecture
-  description: Architecture and design decisions.
+  description: Architecture and design notes.
